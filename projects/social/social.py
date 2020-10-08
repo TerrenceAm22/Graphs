@@ -2,6 +2,8 @@ class User:
     def __init__(self, name):
         self.name = name
 
+import random
+from util import Queue
 class SocialGraph:
     def __init__(self):
         self.last_id = 0
@@ -13,9 +15,9 @@ class SocialGraph:
         Creates a bi-directional friendship
         """
         if user_id == friend_id:
-            print("WARNING: You cannot be friends with yourself")
+            return "WARNING: You cannot be friends with yourself"
         elif friend_id in self.friendships[user_id] or user_id in self.friendships[friend_id]:
-            print("WARNING: Friendship already exists")
+            return "WARNING: Friendship already exists"
         else:
             self.friendships[user_id].add(friend_id)
             self.friendships[friend_id].add(user_id)
@@ -32,10 +34,8 @@ class SocialGraph:
         """
         Takes a number of users and an average number of friendships
         as arguments
-
         Creates that number of users and a randomly distributed friendships
         between those users.
-
         The number of users must be greater than the average number of friendships.
         """
         # Reset graph
@@ -45,26 +45,55 @@ class SocialGraph:
         # !!!! IMPLEMENT ME
 
         # Add users
-
+        for n in range(num_users):
+            self.add_user(n)
         # Create friendships
-
+        
+        # make each user have 2 random friends
+        # check if a friendship exists or not
+        # print(self.users)
+        # print(self.friendships)
+        for u in self.users:
+            get_ran = random.randint(1, len(self.users))
+            if get_ran != u:           
+                self.add_friendship(u, get_ran)
+        for u in self.users:
+            get_ran = random.randint(1, len(self.users))
+            if get_ran not in self.friendships[u] and u not in self.friendships[get_ran]:
+                self.add_friendship(u, get_ran)
+                
+        # for u in self.users:
+        #     get_ran = random.randint(1, len(self.users))
+        #     if get_ran not in self.friendships.values() and get_ran != u and len(self.friendships[u]) < 2:           
+        #         self.add_friendship(u, get_ran)
+        #     else:
+        #         get_ran = random.randint(1, len(self.users))
+                
     def get_all_social_paths(self, user_id):
         """
         Takes a user's user_id as an argument
-
         Returns a dictionary containing every user in that user's
         extended network with the shortest friendship path between them.
-
         The key is the friend's ID and the value is the path.
         """
+        q  = Queue()
+        q.enqueue([user_id])
         visited = {}  # Note that this is a dictionary, not a set
         # !!!! IMPLEMENT ME
+        while q.size() > 0:
+            cur = q.dequeue()
+            last = cur[-1]
+            visited[last] = cur
+            for f in self.friendships[last]:
+                if f not in visited:
+                    new_path = cur + [f]
+                    q.enqueue(new_path)
         return visited
 
 
 if __name__ == '__main__':
     sg = SocialGraph()
     sg.populate_graph(10, 2)
-    print(sg.friendships)
+    # print(sg.friendships)
     connections = sg.get_all_social_paths(1)
     print(connections)
